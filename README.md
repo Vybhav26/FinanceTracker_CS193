@@ -21,7 +21,7 @@ docs/EisenhowerTable.png
 - **Language:** Java (JDK 27)
 - **GUI:** Swing (Java Inbuilt GUI) 
 - **Libraries:** Only standard Java libraries (java.time, java.util, java.io); nothing extra to install
-- **External tools:** cron, curl, APIs, etc.
+- **External tools:** N/A
 - **Data:** Two text files for expenses and budgets
 - **Tools:** VS Code, Git, and GitHub. Compile with javac
 
