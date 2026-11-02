@@ -10,8 +10,11 @@ College students run on a tight budget, and often don’t have a proper tracking
 
 A student can log each expense by category, and set a monthly budget alert with a limit for each category, and are able to see which categories are near or over their limit, and where the month is headed at the current rate at which they’re spending money. And everything would be saved to a text file to have a separate copy of expenses spending.
 
-Diagram can be found at:
+System Diagram:
 ![System diagram](docs/diagram.png)
+
+Eisenhower Table can be found at:
+docs/EisenhowerTable.png
 
 ## Tech Stack + Some details
 
