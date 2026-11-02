@@ -1,4 +1,4 @@
-# Expense Tracker
+# Finance Tracker
 
 A simple Java Swing application that helps to manager expenses and monthly budgets
 
