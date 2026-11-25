@@ -4,14 +4,13 @@ public class Main{
 
     public static void main(String[] args){
 
-        // TODO: create the FileManager
-        // TODO: create the ExpenseManager + GUI Logic
+        // TODO: create the FileManager and load saved data.
+
+        ExpenseManager manager = new ExpenseManager();
 
         SwingUtilities.invokeLater(() -> {
-        
-            ExpenseTrackerGUI gui = new ExpenseTrackerGUI();
+            ExpenseTrackerGUI gui = new ExpenseTrackerGUI(manager);
             gui.setVisible(true);
-        
         });
     }
 }
