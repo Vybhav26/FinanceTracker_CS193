@@ -67,6 +67,52 @@ public class ExpenseManager{
         return total;
     }
 
+    // Add expenses within a given month
+    public ArrayList<Expense> getExpensesForMonth(YearMonth month){
+        ArrayList<Expense> result = new ArrayList<>();
+
+        for(Expense expense : expenses){
+            if(YearMonth.from(expense.getDate()).equals(month)){
+                result.add(expense);
+            }
+        }
+
+        return result;
+    }
+
+    // How many days of the month count as "spent so far".
+    // Past month: the whole month. Current month: up to today. Future month: 0.
+    public int getElapsedDays(YearMonth month, LocalDate today){
+        YearMonth current = YearMonth.from(today);
+
+        if(month.isBefore(current)){
+            return month.lengthOfMonth();
+        }
+        if(month.equals(current)){
+            return today.getDayOfMonth();
+        }
+        return 0;
+    }
+
+    public double getDailyAverage(YearMonth month, LocalDate today){
+        int days = getElapsedDays(month, today);
+
+        if(days == 0){
+            return 0;
+        }
+        return getTotalSpent(month) / days;
+    }
+
+    // Projected spending = daily average x days in the month.
+    // For a past month, the real total is already known, so return that instead.
+    public double getProjectedSpending(YearMonth month, LocalDate today){
+        if(month.isBefore(YearMonth.from(today))){
+            return getTotalSpent(month);
+        }
+        return getDailyAverage(month, today) * month.lengthOfMonth();
+    }
+
+
     public double getRemainingBudget(YearMonth month){
         return budget.getRemainingBudget(getTotalSpent(month));
     }
