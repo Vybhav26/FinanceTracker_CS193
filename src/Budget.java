@@ -23,6 +23,11 @@ public class Budget{
         categoryLimits.put(category.trim().toLowerCase(), limit);
     }
 
+    // Returns a copy, so outside code can't change the real map by accident.
+    public HashMap<String, Double> getCategoryLimits(){
+        return new HashMap<>(categoryLimits);
+    }
+
     public boolean hasCategoryLimit(String category){
         return categoryLimits.containsKey(category.trim().toLowerCase());
     }

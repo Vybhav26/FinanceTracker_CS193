@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FileManager{
 
@@ -87,11 +88,20 @@ public class FileManager{
         }
     }
 
-    // The budget file holds one line: MONTHLY|1000.0
+    // The budget file looks like this:
+    // MONTHLY|1000.0
+    // CATEGORY|food|300.0
     // Returns true if the save worked.
     public boolean saveBudget(Budget budget){
         try(PrintWriter writer = new PrintWriter(new FileWriter(budgetFile))){
             writer.println("MONTHLY|" + budget.getMonthlyLimit());
+
+            HashMap<String, Double> limits = budget.getCategoryLimits();
+
+            for(String category : limits.keySet()){
+                double limit = limits.get(category);
+                writer.println("CATEGORY|" + category + "|" + limit);
+            }
         }catch(IOException e){
             System.out.println("Error saving budget: " + e.getMessage());
             return false;
@@ -111,24 +121,25 @@ public class FileManager{
         try(BufferedReader reader = new BufferedReader(new FileReader(file))){
             String line = reader.readLine();
 
-            if(line != null){
+            while(line != null){
                 String[] parts = line.split("\\|");
+                String type = parts[0];
 
-                // Accept the new format (MONTHLY|1000.0) and the old one (just 1000.0).
-                if(parts.length == 2 && parts[0].equals("MONTHLY")){
-                    budget.setMonthlyLimit(Double.parseDouble(parts[1].trim()));
-                }else if(parts.length == 1){
-                    budget.setMonthlyLimit(Double.parseDouble(parts[0].trim()));
-                }else{
-                    System.out.println("Budget file not recognized, using default.");
+                if(type.equals("MONTHLY")){
+                    double monthly = Double.parseDouble(parts[1]);
+                    budget.setMonthlyLimit(monthly);
                 }
+
+                if(type.equals("CATEGORY")){
+                    String category = parts[1];
+                    double limit = Double.parseDouble(parts[2]);
+                    budget.setCategoryLimit(category, limit);
+                }
+
+                line = reader.readLine();
             }
-        }catch(IOException e){
+        }catch(Exception e){
             System.out.println("Error loading budget: " + e.getMessage());
-        }catch(NumberFormatException e){
-            System.out.println("Budget file has a bad number, using default.");
-        }catch(IllegalArgumentException e){
-            System.out.println("Budget file has an invalid budget, using default.");
         }
 
         return budget;
