@@ -7,6 +7,7 @@ import java.time.YearMonth;
 public class ExpenseTrackerGUI extends JFrame{
 
     private ExpenseManager manager;
+    private FileManager fileManager; 
 
     private DefaultTableModel tableModel;
     private JTable table;
@@ -18,8 +19,9 @@ public class ExpenseTrackerGUI extends JFrame{
 
     private JLabel totalLabel;
 
-    public ExpenseTrackerGUI(ExpenseManager manager){
+    public ExpenseTrackerGUI(ExpenseManager manager, FileManager fileManager){
         this.manager = manager;
+        this.fileManager = fileManager;
 
         setTitle("Expense Tracker");
         setSize(800, 500);
@@ -99,8 +101,8 @@ public class ExpenseTrackerGUI extends JFrame{
         Expense expense = new Expense(date, category, amount, description);
         manager.addExpense(expense);
 
-        // TODO: save with FileManager once it exists.
-
+        fileManager.saveExpenses(manager.getExpenses());
+        
         clearFields();
         refreshTable();
     }
@@ -112,8 +114,7 @@ public class ExpenseTrackerGUI extends JFrame{
         Expense selected = manager.getExpenses().get(row);
         manager.removeExpense(selected);
 
-        // TODO: save with FileManager once it exists.
-
+        fileManager.saveExpenses(manager.getExpenses());
         refreshTable();
     }
 
