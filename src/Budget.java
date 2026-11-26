@@ -11,10 +11,28 @@ public class Budget{
     }
 
     // TODO: Exception handling
+    public void setMonthlyLimit(double monthlyLimit){
+        if(Double.isNaN(monthlyLimit) || Double.isInfinite(monthlyLimit) || monthlyLimit <= 0){
+            throw new IllegalArgumentException("Budget must be a positive number.");
+        }
+        this.monthlyLimit = monthlyLimit;
+    }
+
+    public void setCategoryLimit(String category, double limit){
+        if(category == null || category.trim().isEmpty()){
+            throw new IllegalArgumentException("Category is required.");
+        }
+        if(Double.isNaN(limit) || Double.isInfinite(limit) || limit <= 0){
+            throw new IllegalArgumentException("Category limit must be a positive number.");
+        }
+        categoryLimits.put(category.trim().toLowerCase(), limit);
+    }
+
     public double getMonthlyLimit(){
         return monthlyLimit;
     }
 
+    /* 
     public void setMonthlyLimit(double monthlyLimit){
         this.monthlyLimit = monthlyLimit;
     }
@@ -22,6 +40,8 @@ public class Budget{
     public void setCategoryLimit(String category, double limit){
         categoryLimits.put(category.trim().toLowerCase(), limit);
     }
+    */
+
 
     // Returns a copy, so outside code can't change the real map by accident.
     public HashMap<String, Double> getCategoryLimits(){

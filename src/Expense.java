@@ -43,7 +43,7 @@ public class Expense{
         if(category == null || category.trim().isEmpty()){
             throw new IllegalArgumentException("Category is required.");
         }
-        this.category = category;
+        this.category = category.replace("|", "/").trim();
     }
 
     public void setAmount(double amount){
@@ -57,7 +57,7 @@ public class Expense{
         if(description == null){
             this.description = "";
         }else{
-            this.description = description;
+            this.description = description.replace("|", "/").trim();
         }
     }
 
