@@ -4,14 +4,25 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-public class ExpenseTrackerGUI extends JFrame{
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+public class ExpenseTrackerGUI extends JFrame {
+
+    // Shown expenses on the table, in row order
+    // copy, of sorts
+    private ArrayList<Expense> shownExpenses;
+
+    
     private ExpenseManager manager;
     private FileManager fileManager; 
 
+    // Table fields
     private DefaultTableModel tableModel;
     private JTable table;
 
+    // Input Fields
     private JTextField dateField;
     private JTextField categoryField;
     private JTextField amountField;
@@ -19,9 +30,29 @@ public class ExpenseTrackerGUI extends JFrame{
 
     private JLabel totalLabel;
 
+    // Month GUI fields
+    private JComboBox<String> monthBox;
+    private JComboBox<Integer> yearBox;
+
+    // Summary Fields
+    private JLabel budgetLabel;
+    private JLabel spentLabel;
+    private JLabel leftLabel;
+    private JLabel statusLabel;
+    private JLabel averageLabel;
+    private JLabel projectedLabel;
+    private JTextArea categoryArea;
+
+    private static final String[] MONTH_NAMES = {
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+
+
     public ExpenseTrackerGUI(ExpenseManager manager, FileManager fileManager){
         this.manager = manager;
         this.fileManager = fileManager;
+        this.shownExpenses = new ArrayList<>();
 
         setTitle("Expense Tracker");
         setSize(800, 500);
@@ -30,12 +61,16 @@ public class ExpenseTrackerGUI extends JFrame{
 
         createComponents();
         refreshTable();
+        //refreshAll();
     }
 
     private void createComponents(){
         setLayout(new BorderLayout(8, 8));
 
         // Top -- input fields
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+
         JPanel inputPanel = new JPanel(new GridLayout(2, 4, 6, 4));
 
         dateField = new JTextField(LocalDate.now().toString());
@@ -52,6 +87,32 @@ public class ExpenseTrackerGUI extends JFrame{
         inputPanel.add(categoryField);
         inputPanel.add(amountField);
         inputPanel.add(descriptionField);
+
+        // Input Fields + Month Selector via combo box
+
+        JPanel viewPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+
+        monthBox = new JComboBox<>(MONTH_NAMES);
+        yearBox = new JComboBox<>();
+
+        LocalDate today = LocalDate.now();
+
+        for(int year = today.getYear() - 5; year <= today.getYear() + 1; year++){
+            yearBox.addItem(year);
+        }
+
+        yearBox.setSelectedItem(today.getYear());
+        monthBox.setSelectedIndex(today.getMonthValue() - 1);
+
+        viewPanel.add(new JLabel("Showing month:"));
+        viewPanel.add(monthBox);
+        viewPanel.add(new JLabel("Year:"));
+        viewPanel.add(yearBox);
+
+        topPanel.add(inputPanel);
+        topPanel.add(viewPanel);
+
+
 
         add(inputPanel, BorderLayout.NORTH);
 
@@ -85,6 +146,42 @@ public class ExpenseTrackerGUI extends JFrame{
         bottomPanel.add(totalLabel, BorderLayout.EAST);
 
         add(bottomPanel, BorderLayout.SOUTH);
+
+
+        // Right -- Summary Panel + Budget Limits
+
+        JPanel summaryPanel = new JPanel();
+        summaryPanel.setLayout(new BoxLayout(summaryPanel, BoxLayout.Y_AXIS));
+        summaryPanel.setBorder(BorderFactory.createTitledBorder("Summary"));
+        summaryPanel.setPreferredSize(new Dimension(320, 100));
+
+        budgetLabel = new JLabel();
+        spentLabel = new JLabel();
+        leftLabel = new JLabel();
+        statusLabel = new JLabel();
+        averageLabel = new JLabel();
+        projectedLabel = new JLabel();
+
+        summaryPanel.add(budgetLabel);
+        summaryPanel.add(spentLabel);
+        summaryPanel.add(leftLabel);
+        summaryPanel.add(statusLabel);
+        summaryPanel.add(Box.createVerticalStrut(10));
+        summaryPanel.add(averageLabel);
+        summaryPanel.add(projectedLabel);
+        summaryPanel.add(Box.createVerticalStrut(10));
+
+        categoryArea = new JTextArea();
+        categoryArea.setEditable(false);
+
+        JScrollPane categoryScroll = new JScrollPane(categoryArea);
+        categoryScroll.setBorder(BorderFactory.createTitledBorder("Category limits"));
+        summaryPanel.add(categoryScroll);
+
+        add(summaryPanel, BorderLayout.EAST);
+
+
+
 
         // Connect the buttons
         addButton.addActionListener(e -> addExpense());
