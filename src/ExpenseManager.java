@@ -112,16 +112,6 @@ public class ExpenseManager{
         return getDailyAverage(month, today) * month.lengthOfMonth();
     }
 
-
-    public double getRemainingBudget(YearMonth month){
-        return budget.getRemainingBudget(getTotalSpent(month));
-    }
-
-    public double getRemainingCategoryBudget(YearMonth month, String category){
-        double spent = getTotalSpentByCategory(month, category);
-        return budget.getRemainingCategoryBudget(category, spent);
-    }
-
     public Budget getBudget(){
         return budget;
     }

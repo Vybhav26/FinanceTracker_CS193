@@ -3,53 +3,45 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
-
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.format.DateTimeParseException;
 
 public class ExpenseTrackerGUI extends JFrame {
 
-    // Shown expenses on the table, in row order
-    // copy, of sorts
     private ArrayList<Expense> shownExpenses;
 
-    
     private ExpenseManager manager;
-    private FileManager fileManager; 
+    private FileManager fileManager;
 
     // Table fields
     private DefaultTableModel tableModel;
     private JTable table;
 
-    // Input Fields
+    // Input fields
     private JTextField dateField;
     private JTextField categoryField;
     private JTextField amountField;
     private JTextField descriptionField;
 
-    private JLabel totalLabel;
-
-    // Month GUI fields
+    // Month fields
     private JComboBox<String> monthBox;
     private JComboBox<Integer> yearBox;
 
-    // Summary Fields
+    // Summary fields
     private JLabel budgetLabel;
     private JLabel spentLabel;
     private JLabel leftLabel;
     private JLabel statusLabel;
-    private JLabel averageLabel;
     private JLabel projectedLabel;
     private JTextArea categoryArea;
 
     private static final String[] MONTH_NAMES = {
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        "January", "February", "March", "April",
+        "May", "June", "July", "August",
+        "September", "October", "November", "December"
     };
 
-
-    public ExpenseTrackerGUI(ExpenseManager manager, FileManager fileManager){
+    public ExpenseTrackerGUI(ExpenseManager manager, FileManager fileManager) {
         this.manager = manager;
         this.fileManager = fileManager;
         this.shownExpenses = new ArrayList<>();
@@ -60,14 +52,12 @@ public class ExpenseTrackerGUI extends JFrame {
         setLocationRelativeTo(null);
 
         createComponents();
-        refreshTable();
-        //refreshAll();
     }
 
-    private void createComponents(){
+    private void createComponents() {
         setLayout(new BorderLayout(8, 8));
 
-        // Top -- input fields
+        // Input fields
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
@@ -88,8 +78,7 @@ public class ExpenseTrackerGUI extends JFrame {
         inputPanel.add(amountField);
         inputPanel.add(descriptionField);
 
-        // Input Fields + Month Selector via combo box
-
+        // Month and year selector
         JPanel viewPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
 
         monthBox = new JComboBox<>(MONTH_NAMES);
@@ -97,7 +86,8 @@ public class ExpenseTrackerGUI extends JFrame {
 
         LocalDate today = LocalDate.now();
 
-        for(int year = today.getYear() - 5; year <= today.getYear() + 1; year++){
+        for (int year = today.getYear() - 5;
+             year <= today.getYear() + 1; year++) {
             yearBox.addItem(year);
         }
 
@@ -112,62 +102,59 @@ public class ExpenseTrackerGUI extends JFrame {
         topPanel.add(inputPanel);
         topPanel.add(viewPanel);
 
+        add(topPanel, BorderLayout.NORTH);
 
+        // Expense table
+        String[] columns = {
+            "Date", "Category", "Amount", "Description"
+        };
 
-        add(inputPanel, BorderLayout.NORTH);
-
-        // Center -- main interface
-        String[] columns = {"Date", "Category", "Amount", "Description"};
-
-        tableModel = new DefaultTableModel(columns, 0){
+        tableModel = new DefaultTableModel(columns, 0) {
             @Override
-            public boolean isCellEditable(int row, int column){
+            public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
         table = new JTable(tableModel);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Bottom
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-
+        // Buttons
         JPanel buttonPanel = new JPanel();
+
         JButton addButton = new JButton("Add Expense");
         JButton deleteButton = new JButton("Delete Selected");
-        JButton clearButton = new JButton("Clear Fields");
+        JButton updateButton = new JButton("Update Selected");
+        JButton budgetButton = new JButton("Set Monthly Budget");
+        JButton categoryButton = new JButton("Set Category Limit");
+
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
-        buttonPanel.add(clearButton);
+        buttonPanel.add(updateButton);
+        buttonPanel.add(budgetButton);
+        buttonPanel.add(categoryButton);
 
-        totalLabel = new JLabel();
+        add(buttonPanel, BorderLayout.SOUTH);
 
-        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
-        bottomPanel.add(totalLabel, BorderLayout.EAST);
-
-        add(bottomPanel, BorderLayout.SOUTH);
-
-
-        // Right -- Summary Panel + Budget Limits
-
+        // Summary panel
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(new BoxLayout(summaryPanel, BoxLayout.Y_AXIS));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("Summary"));
         summaryPanel.setPreferredSize(new Dimension(320, 100));
 
-        budgetLabel = new JLabel();
-        spentLabel = new JLabel();
-        leftLabel = new JLabel();
-        statusLabel = new JLabel();
-        averageLabel = new JLabel();
-        projectedLabel = new JLabel();
+        budgetLabel = new JLabel("Monthly budget:");
+        spentLabel = new JLabel("Spent:");
+        leftLabel = new JLabel("Left to spend:");
+        statusLabel = new JLabel("Status:");
+        projectedLabel = new JLabel("Projected month-end:");
 
         summaryPanel.add(budgetLabel);
         summaryPanel.add(spentLabel);
         summaryPanel.add(leftLabel);
         summaryPanel.add(statusLabel);
         summaryPanel.add(Box.createVerticalStrut(10));
-        summaryPanel.add(averageLabel);
         summaryPanel.add(projectedLabel);
         summaryPanel.add(Box.createVerticalStrut(10));
 
@@ -175,19 +162,82 @@ public class ExpenseTrackerGUI extends JFrame {
         categoryArea.setEditable(false);
 
         JScrollPane categoryScroll = new JScrollPane(categoryArea);
-        categoryScroll.setBorder(BorderFactory.createTitledBorder("Category limits"));
+        categoryScroll.setBorder(
+            BorderFactory.createTitledBorder("Category limits")
+        );
+
         summaryPanel.add(categoryScroll);
 
         add(summaryPanel, BorderLayout.EAST);
 
-
-
-
-        // Connect the buttons
+        // Button actions
         addButton.addActionListener(e -> addExpense());
         deleteButton.addActionListener(e -> deleteExpense());
-        clearButton.addActionListener(e -> clearFields());
+        updateButton.addActionListener(e -> updateExpense());
+        budgetButton.addActionListener(e -> setMonthlyBudget());
+        categoryButton.addActionListener(e -> setCategoryLimit());
+
+        // Month selection actions
+        monthBox.addActionListener(e -> refreshAll());
+        yearBox.addActionListener(e -> refreshAll());
+
+        // Table selection action
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                loadSelectedIntoFields();
+            }
+        });
     }
+
+    // Temporary Placeholders for the sake of orgonization
+    // Refactoring some of the old methods so it relies on ArrayLists, not Hashmaps
+
+    private void addExpense() {
+    }
+
+    private void deleteExpense() {
+    }
+
+    private void updateExpense() {
+    }
+
+    private void setMonthlyBudget() {
+    }
+
+    private void setCategoryLimit() {
+    }
+
+    private void loadSelectedIntoFields() {
+    }
+
+    // Refresh table and summary
+    private void refreshAll() {
+        refreshTable();
+    }
+
+    // Display expenses for the selected month
+    private void refreshTable() {
+        // TODO: write the implementation so the below line is valid
+        // shownExpenses = manager.getExpensesForMonth(getSelectedMonth());
+
+        tableModel.setRowCount(0);
+
+        for (Expense expense : shownExpenses) {
+            Object[] row = {
+                expense.getDate(),
+                expense.getCategory(),
+                String.format("$%.2f", expense.getAmount()),
+                expense.getDescription()
+            };
+
+            tableModel.addRow(row);
+        }
+    }
+}
+    /*
+
+    Legacy Code when summary panel, and other pannels (except the main one) weren't available
+
 
     private void addExpense(){
         LocalDate date = LocalDate.parse(dateField.getText().trim());
@@ -243,4 +293,4 @@ public class ExpenseTrackerGUI extends JFrame {
 
         totalLabel.setText(String.format("This month: $%.2f spent, $%.2f left  ", spent, remaining));
     }
-}
+    */

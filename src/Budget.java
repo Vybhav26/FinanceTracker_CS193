@@ -66,10 +66,6 @@ public class Budget{
         return categoryNames.get(index);
     }
 
-    public boolean hasCategoryLimit(String category){
-        return getCategoryLimit(category) > 0;
-    }
-
     // Returns 0 if the category has no limit
     public double getCategoryLimit(String category){
         String key = category.trim().toLowerCase();
@@ -80,22 +76,6 @@ public class Budget{
             }
         }
         return 0;
-    }
-
-    public double getRemainingBudget(double totalSpent){
-        return monthlyLimit - totalSpent;
-    }
-
-    public double getRemainingCategoryBudget(String category, double spent){
-        return getCategoryLimit(category) - spent;
-    }
-
-    // Returns spent / limit as a percent, like 65.0 for 65%
-    public double getUtilization(double spent, double limit){
-        if(limit <= 0){
-            return 0;
-        }
-        return (spent / limit) * 100.0;
     }
 
     // Returns "On Track", "Near Limit", "At Limit", or "Over Budget"
@@ -114,9 +94,5 @@ public class Budget{
             return "Near Limit";
         }
         return "On Track";
-    }
-
-    public boolean isOverBudget(double totalSpent){
-        return totalSpent > monthlyLimit;
     }
 }

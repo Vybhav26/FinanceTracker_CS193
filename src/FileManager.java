@@ -1,16 +1,10 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class FileManager{
 
-    private String expenseFile = "data/expenses.txt";
+     private String expenseFile = "data/expenses.txt";
     private String budgetFile = "data/budget.txt";
 
     public FileManager(){
@@ -96,11 +90,9 @@ public class FileManager{
         try(PrintWriter writer = new PrintWriter(new FileWriter(budgetFile))){
             writer.println("MONTHLY|" + budget.getMonthlyLimit());
 
-            HashMap<String, Double> limits = budget.getCategoryLimits();
-
-            for(String category : limits.keySet()){
-                double limit = limits.get(category);
-                writer.println("CATEGORY|" + category + "|" + limit);
+            for(int i = 0; i < budget.getCategoryCount(); i++){
+                String category = budget.getCategoryName(i);
+                writer.println("CATEGORY|" + category + "|" + budget.getCategoryLimit(category));
             }
         }catch(IOException e){
             System.out.println("Error saving budget: " + e.getMessage());
