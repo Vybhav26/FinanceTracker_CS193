@@ -1,13 +1,15 @@
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class Budget{
 
     private double monthlyLimit;
-    private HashMap<String, Double> categoryLimits;
+    private ArrayList<String> categoryNames;
+    private ArrayList<Double> categoryLimits;
 
     public Budget(double monthlyLimit){
         setMonthlyLimit(monthlyLimit);
-        categoryLimits = new HashMap<>();
+        categoryNames = new ArrayList<>();
+        categoryLimits = new ArrayList<>();
     }
 
     // TODO: Exception handling
@@ -25,7 +27,21 @@ public class Budget{
         if(Double.isNaN(limit) || Double.isInfinite(limit) || limit <= 0){
             throw new IllegalArgumentException("Category limit must be a positive number.");
         }
-        categoryLimits.put(category.trim().toLowerCase(), limit);
+
+        String name = category.trim().toLowerCase();
+        int index = -1;
+        for(int i = 0; i < categoryNames.size(); i++){
+            if(categoryNames.get(i).equals(name)){
+                index = i;
+            }
+        }
+
+        if(index >= 0){
+            categoryLimits.set(index, limit);
+        }else{
+            categoryNames.add(name);
+            categoryLimits.add(limit);
+        }
     }
 
     public double getMonthlyLimit(){
@@ -42,22 +58,26 @@ public class Budget{
     }
     */
 
+    public int getCategoryCount(){
+        return categoryNames.size();
+    }
 
-    // Returns a copy, so outside code can't change the real map by accident.
-    public HashMap<String, Double> getCategoryLimits(){
-        return new HashMap<>(categoryLimits);
+    public String getCategoryName(int index){
+        return categoryNames.get(index);
     }
 
     public boolean hasCategoryLimit(String category){
-        return categoryLimits.containsKey(category.trim().toLowerCase());
+        return getCategoryLimit(category) > 0;
     }
 
-    // Returns 0 if the category has no limit.
+    // Returns 0 if the category has no limit
     public double getCategoryLimit(String category){
         String key = category.trim().toLowerCase();
 
-        if(categoryLimits.containsKey(key)){
-            return categoryLimits.get(key);
+        for(int i = 0; i < categoryNames.size(); i++){
+            if(categoryNames.get(i).equals(key)){
+                return categoryLimits.get(i);
+            }
         }
         return 0;
     }
@@ -70,7 +90,7 @@ public class Budget{
         return getCategoryLimit(category) - spent;
     }
 
-    // Returns spent / limit as a percent, like 65.0 for 65%.
+    // Returns spent / limit as a percent, like 65.0 for 65%
     public double getUtilization(double spent, double limit){
         if(limit <= 0){
             return 0;
@@ -78,9 +98,9 @@ public class Budget{
         return (spent / limit) * 100.0;
     }
 
-    // Returns "On Track", "Near Limit", "At Limit", or "Over Budget".
+    // Returns "On Track", "Near Limit", "At Limit", or "Over Budget"
     public String getStatus(double spent, double limit){
-        // Round to whole cents first so small decimal errors (like 0.1 + 0.2) don't matter.
+        // Round to whole cents 
         double spentCents = Math.round(spent * 100.0);
         double limitCents = Math.round(limit * 100.0);
 
